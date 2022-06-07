@@ -4911,6 +4911,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     /* Set the runtime profile to the default.
      * If a profile is part of the state activate it at the end.
      */
+    fprintf(stderr, "Setting NULL profile before unmarshalling!\n");
     rc = RuntimeProfileSet(&g_RuntimeProfile, NULL);
 
     if (rc == TPM_RC_SUCCESS) {
@@ -4976,6 +4977,7 @@ skip_future_versions:
         NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
         NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
         /* Activate a profile read from the state of the TPM 2 */
+        fprintf(stderr, "profile from state: %s\n", profileJSON);
         rc = RuntimeProfileSet(&g_RuntimeProfile, profileJSON);
     }
 

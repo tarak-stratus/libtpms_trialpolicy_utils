@@ -270,6 +270,8 @@ RuntimeCommandsSetProfile(
     unsigned int idx;
     size_t toklen;
 
+    TPMLIB_LogPrintf("%s: new profile: %s\n", __func__, newProfile);
+
     /* NULL pointer for profile enables all */
     if (!newProfile) {
 	RuntimeCommandsSetDefault(RuntimeCommands);
