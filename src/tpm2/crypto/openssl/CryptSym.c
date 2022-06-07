@@ -773,6 +773,9 @@ CryptSymKeyValidate(
 {
     if(key->t.size != BITS_TO_BYTES(symDef->keyBits.sym))
 	return TPM_RCS_KEY_SIZE;
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(symDef->algorithm,		// libtpms added begin
+					     symDef->keyBits.sym))
+	return TPM_RCS_KEY_SIZE;					// libtpms added end
 #if ALG_TDES
     if(symDef->algorithm == TPM_ALG_TDES && !CryptDesValidateKey(key))
 	return TPM_RCS_KEY;

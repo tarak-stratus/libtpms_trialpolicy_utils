@@ -1451,7 +1451,12 @@ CryptValidateKeys(
 	{
 #if ALG_RSA
 	  case TPM_ALG_RSA:
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_RSA,		// libtpms added begin
+						     params->rsaDetail.keyBits))
+		return TPM_RC_KEY_SIZE;						// libtpms added end
+
 	    keySizeInBytes = BITS_TO_BYTES(params->rsaDetail.keyBits);
+
 	    // Regardless of whether there is a sensitive area, the public modulus
 	    // needs to have the correct size. Otherwise, it can't be used for
 	    // any public key operation nor can it be used to compute the private
@@ -1481,6 +1486,11 @@ CryptValidateKeys(
 		  TPMI_ECC_CURVE      curveId;
 		  curveId = params->eccDetail.curveID;
 		  keySizeInBytes = BITS_TO_BYTES(CryptEccGetKeySizeForCurve(curveId));
+
+		  if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_ECC,		// libtpms added begin
+							   CryptEccGetKeySizeForCurve(curveId)))
+		      return TPM_RC_KEY_SIZE;					// libtpms added end
+
 		  if(sensitive == NULL)
 		      {
 			  // Validate the public key size
