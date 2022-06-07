@@ -123,6 +123,9 @@ TPM_RC GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
     int i;
     UINT16 keySizeInBytes = keySizeInBits / 8;
 
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(algorithm, keySizeInBits))
+        return TPM_RC_KEY_SIZE;
+
     // key size to array index: 128 -> 0, 192 -> 1, 256 -> 2
     i = (keySizeInBits >> 6) - 2;
     if (i < 0 || i > 2)
