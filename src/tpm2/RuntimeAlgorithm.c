@@ -282,6 +282,7 @@ RuntimeAlgorithmSetProfile(
 		continue;
 	    cmplen = MAX(strlen(algname_to_id[algId].name), toklen);
 	    if (!strncmp(token, algname_to_id[algId].name, cmplen)) {
+		fprintf(stderr, "Enabling %s: 0x%x\n", algname_to_id[algId].name, algId);
 		SET_BIT(algId, s_enabledAlgorithms);
 	    } else if (algname_to_id[algId].u.keySizes) {
 		size_t algnamelen = strlen(algname_to_id[algId].name);
@@ -294,6 +295,7 @@ RuntimeAlgorithmSetProfile(
 		    goto exit;
 		}
 		s_algosMinimumKeySizes[algId] = (UINT16)minKeySize;
+		fprintf(stderr, "Set minimum key size for %s: %u\n", algname_to_id[algId].name, s_algosMinimumKeySizes[algId]);
 	    }
 	}
 
@@ -367,6 +369,7 @@ RuntimeAlgorithmCheckEnabled(
 			     TPM_ALG_ID	   algId      // IN: the algorithm to check
 			     )
 {
+    fprintf(stderr, "IsEnEnabled(0x%x): %d\n", algId, TEST_BIT(algId, s_enabledAlgorithms));
     if (!TEST_BIT(algId, s_enabledAlgorithms))
 	return FALSE;
     return TRUE;
@@ -382,10 +385,13 @@ RuntimeAlgorithmKeySizeCheckEnabled(
 {
     UINT16 minKeySize;
 
+    fprintf(stderr, "Check: %s-%d\n", algname_to_id[algId].name, keySizeInBits);
+
     if (!RuntimeAlgorithmCheckEnabled(algId))
     	return FALSE;
 
     minKeySize = s_algosMinimumKeySizes[algId];
+    fprintf(stderr, "  MinKeySize: %u  current key's Size: %u\n", minKeySize, keySizeInBits);
     if (minKeySize > keySizeInBits)
 	return FALSE;
 
