@@ -1,9 +1,8 @@
 /********************************************************************************/
 /*										*/
-/*		Root header file for building any TPM.lib code			*/
-/*			     Written by Ken Goldman				*/
+/*			 Algorithm Runtime Disablement 				*/
+/*			     Written by stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
-/*            $Id: Tpm.h 1594 2020-03-26 22:15:48Z kgoldman $			*/
 /*										*/
 /*  Licenses and Notices							*/
 /*										*/
@@ -55,28 +54,59 @@
 /*    arising in any way out of use or reliance upon this specification or any 	*/
 /*    information herein.							*/
 /*										*/
-/*  (c) Copyright IBM Corp. and others, 2016 - 2020				*/
+/*  (c) Copyright IBM Corp. and others, 2022					*/
 /*										*/
 /********************************************************************************/
 
-/* 5.18	Tpm.h */
-/* Root header file for building any TPM.lib code */
-#ifndef     _TPM_H_
-#define     _TPM_H_
+#ifndef RUNTIME_ALGORITHM_H
+#define RUNTIME_ALGORITHM_H
 
-#include "TpmBuildSwitches.h"
-#include "BaseTypes.h"
-#include "TPMB.h"
-#include "MinMax.h"
-#include "TpmProfile.h"
-#include "TpmAlgorithmDefines.h"
-#include "LibSupport.h"         // Types from the library. These need to come before
-// Global.h because some of the structures in
-// that file depend on the structures used by the
-// cryptographic libraries.
-#include "GpMacros.h"           // Define additional macros
-#include "Global.h"             // Define other TPM types
-#include "InternalRoutines.h"   // Function prototypes
-#include "RuntimeAlgorithm_fp.h"// libtpms added
+#include "Tpm.h"
 
-#endif // _TPM_H_
+void
+RuntimeAlgorithmInit(
+                     void
+                     );
+
+TPM_RC
+RuntimeAlgorithmSetProfile(
+                           const char *newProfile
+                           );
+
+const char *
+RuntimeAlgorithmGetProfile(
+                           void
+                           );
+
+TPM_RC
+RuntimeAlgorithmSwitchProfile(
+			      const char *newProfile,
+			      char **oldProfile
+			      );
+
+BOOL
+RuntimeAlgorithmCheckEnabled(
+                             TPM_ALG_ID                    algId      // IN: the algorithm to check
+                             );
+
+BOOL
+RuntimeAlgorithmKeySizeCheckEnabled(
+                                    TPM_ALG_ID   algId,         // IN: the algorithm to check
+                                    UINT16       keySizeInBits  // IN: size of the key in bits
+                                    );
+
+enum RuntimeAlgorithmType {
+    RUNTIME_ALGO_IMPLEMENTED,
+    RUNTIME_ALGO_ENABLED,
+    RUNTIME_ALGO_DISABLED,
+    RUNTIME_ALGO_CAN_BE_DISABLED,
+
+    RUNTIME_ALGO_NUM, /* keep last */
+};
+
+char *
+RuntimeAlgorithmGet(
+                    enum RuntimeAlgorithmType rat
+                    );
+
+#endif /* RUNTIME_ALGORITHM_H */
