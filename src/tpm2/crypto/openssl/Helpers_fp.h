@@ -73,13 +73,14 @@ OpenSSLCryptGenerateKeyDes(
 
 typedef const EVP_CIPHER *(*evpfunc)(void);
 
-evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
-                     UINT16        keySizeInBits,   // IN
-                     TPM_ALG_ID    mode,            // IN
-                     const BYTE   *key,             // IN
-                     BYTE         *keyToUse,        // OUT same as key or stretched key
-                     UINT16       *keyToUseLen      // IN/OUT
-                     );
+TPM_RC GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
+                    UINT16        keySizeInBits,   // IN
+                    TPM_ALG_ID    mode,            // IN
+                    const BYTE   *key,             // IN
+                    BYTE         *keyToUse,        // OUT same as key or stretched key
+                    UINT16       *keyToUseLen,     // IN/OUT
+                    evpfunc      *evpfn
+                    );
 #endif
 
 #if USE_OPENSSL_FUNCTIONS_EC

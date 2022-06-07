@@ -111,22 +111,22 @@ OpenSSLCryptGenerateKeyDes(
     return TPM_RC_SUCCESS;
 }
 
-evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
-                     UINT16        keySizeInBits,   // IN
-                     TPM_ALG_ID    mode,            // IN
-                     const BYTE   *key,             // IN
-                     BYTE         *keyToUse,        // OUT same as key or stretched key
-                     UINT16       *keyToUseLen      // IN/OUT
-                    )
+TPM_RC GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
+                    UINT16        keySizeInBits,   // IN
+                    TPM_ALG_ID    mode,            // IN
+                    const BYTE   *key,             // IN
+                    BYTE         *keyToUse,        // OUT same as key or stretched key
+                    UINT16       *keyToUseLen,      // IN/OUT
+                    evpfunc      *evpfn            // OUT
+                   )
 {
     int i;
     UINT16 keySizeInBytes = keySizeInBits / 8;
-    evpfunc evpfn = NULL;
 
     // key size to array index: 128 -> 0, 192 -> 1, 256 -> 2
     i = (keySizeInBits >> 6) - 2;
     if (i < 0 || i > 2)
-        return NULL;
+        return TPM_RC_FAILURE;
 
     pAssert(*keyToUseLen >= keySizeInBytes)
     memcpy(keyToUse, key, keySizeInBytes);
@@ -138,32 +138,32 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
         switch (mode) {
 #if ALG_CTR
         case TPM_ALG_CTR:
-            evpfn = (evpfunc []){EVP_aes_128_ctr, EVP_aes_192_ctr,
-                                 EVP_aes_256_ctr}[i];
+            *evpfn = (evpfunc []){EVP_aes_128_ctr, EVP_aes_192_ctr,
+                                  EVP_aes_256_ctr}[i];
             break;
 #endif
 #if ALG_OFB
         case TPM_ALG_OFB:
-            evpfn = (evpfunc[]){EVP_aes_128_ofb, EVP_aes_192_ofb,
-                                EVP_aes_256_ofb}[i];
+            *evpfn = (evpfunc[]){EVP_aes_128_ofb, EVP_aes_192_ofb,
+                                 EVP_aes_256_ofb}[i];
             break;
 #endif
 #if ALG_CBC
         case TPM_ALG_CBC:
-            evpfn = (evpfunc[]){EVP_aes_128_cbc, EVP_aes_192_cbc,
-                                EVP_aes_256_cbc}[i];
+            *evpfn = (evpfunc[]){EVP_aes_128_cbc, EVP_aes_192_cbc,
+                                 EVP_aes_256_cbc}[i];
             break;
 #endif
 #if ALG_CFB
         case TPM_ALG_CFB:
-            evpfn = (evpfunc[]){EVP_aes_128_cfb, EVP_aes_192_cfb,
-                                EVP_aes_256_cfb}[i];
+            *evpfn = (evpfunc[]){EVP_aes_128_cfb, EVP_aes_192_cfb,
+                                 EVP_aes_256_cfb}[i];
             break;
 #endif
 #if ALG_ECB
         case TPM_ALG_ECB:
-            evpfn = (evpfunc[]){EVP_aes_128_ecb, EVP_aes_192_ecb,
-                                EVP_aes_256_ecb}[i];
+            *evpfn = (evpfunc[]){EVP_aes_128_ecb, EVP_aes_192_ecb,
+                                 EVP_aes_256_ecb}[i];
             break;
 #endif
         }
@@ -181,27 +181,27 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
         switch (mode) {
 #if ALG_CTR
         case TPM_ALG_CTR:
-            evpfn = (evpfunc[]){EVP_des_ede3, EVP_des_ede3, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_des_ede3, EVP_des_ede3, NULL}[i];
             break;
 #endif
 #if ALG_OFB
         case TPM_ALG_OFB:
-            evpfn = (evpfunc[]){EVP_des_ede3_ofb, EVP_des_ede3_ofb, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_des_ede3_ofb, EVP_des_ede3_ofb, NULL}[i];
             break;
 #endif
 #if ALG_CBC
         case TPM_ALG_CBC:
-            evpfn = (evpfunc[]){EVP_des_ede3_cbc, EVP_des_ede3_cbc, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_des_ede3_cbc, EVP_des_ede3_cbc, NULL}[i];
             break;
 #endif
 #if ALG_CFB
         case TPM_ALG_CFB:
-            evpfn = (evpfunc[]){EVP_des_ede3_cfb64, EVP_des_ede3_cfb64, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_des_ede3_cfb64, EVP_des_ede3_cfb64, NULL}[i];
             break;
 #endif
 #if ALG_ECB
         case TPM_ALG_ECB:
-            evpfn = (evpfunc[]){EVP_des_ede3_ecb, EVP_des_ede3_ecb, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_des_ede3_ecb, EVP_des_ede3_ecb, NULL}[i];
             break;
 #endif
         }
@@ -214,27 +214,27 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
         switch (mode) {
 #if ALG_CTR
         case TPM_ALG_CTR:
-            evpfn = (evpfunc[]){EVP_sm4_ctr, NULL, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_sm4_ctr, NULL, NULL}[i];
             break;
 #endif
 #if ALG_OFB
         case TPM_ALG_OFB:
-            evpfn = (evpfunc[]){EVP_sm4_ofb, NULL, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_sm4_ofb, NULL, NULL}[i];
             break;
 #endif
 #if ALG_CBC
         case TPM_ALG_CBC:
-            evpfn = (evpfunc[]){EVP_sm4_cbc, NULL, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_sm4_cbc, NULL, NULL}[i];
             break;
 #endif
 #if ALG_CFB
         case TPM_ALG_CFB:
-            evpfn = (evpfunc[]){EVP_sm4_cfb, NULL, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_sm4_cfb, NULL, NULL}[i];
             break;
 #endif
 #if ALG_ECB
         case TPM_ALG_ECB:
-            evpfn = (evpfunc[]){EVP_sm4_ecb, NULL, NULL}[i];
+            *evpfn = (evpfunc[]){EVP_sm4_ecb, NULL, NULL}[i];
             break;
 #endif
         }
@@ -247,32 +247,32 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
         switch (mode) {
 #if ALG_CTR
         case TPM_ALG_CTR:
-            evpfn = (evpfunc []){EVP_camellia_128_ctr, EVP_camellia_192_ctr,
-                                 EVP_camellia_256_ctr}[i];
+            *evpfn = (evpfunc []){EVP_camellia_128_ctr, EVP_camellia_192_ctr,
+                                  EVP_camellia_256_ctr}[i];
             break;
 #endif
 #if ALG_OFB
         case TPM_ALG_OFB:
-            evpfn = (evpfunc[]){EVP_camellia_128_ofb, EVP_camellia_192_ofb,
-                                EVP_camellia_256_ofb}[i];
+            *evpfn = (evpfunc[]){EVP_camellia_128_ofb, EVP_camellia_192_ofb,
+                                 EVP_camellia_256_ofb}[i];
             break;
 #endif
 #if ALG_CBC
         case TPM_ALG_CBC:
-            evpfn = (evpfunc[]){EVP_camellia_128_cbc, EVP_camellia_192_cbc,
-                                EVP_camellia_256_cbc}[i];
+            *evpfn = (evpfunc[]){EVP_camellia_128_cbc, EVP_camellia_192_cbc,
+                                 EVP_camellia_256_cbc}[i];
             break;
 #endif
 #if ALG_CFB
         case TPM_ALG_CFB:
-            evpfn = (evpfunc[]){EVP_camellia_128_cfb, EVP_camellia_192_cfb,
-                                EVP_camellia_256_cfb}[i];
+            *evpfn = (evpfunc[]){EVP_camellia_128_cfb, EVP_camellia_192_cfb,
+                                 EVP_camellia_256_cfb}[i];
             break;
 #endif
 #if ALG_ECB
         case TPM_ALG_ECB:
-            evpfn = (evpfunc[]){EVP_camellia_128_ecb, EVP_camellia_192_ecb,
-                                EVP_camellia_256_ecb}[i];
+            *evpfn = (evpfunc[]){EVP_camellia_128_ecb, EVP_camellia_192_ecb,
+                                 EVP_camellia_256_ecb}[i];
             break;
 #endif
         }
@@ -280,10 +280,11 @@ evpfunc GetEVPCipher(TPM_ALG_ID    algorithm,       // IN
 #endif
     }
 
-    if (evpfn == NULL)
+    if (*evpfn == NULL)
         MemorySet(keyToUse, 0, *keyToUseLen);
 
-    return evpfn;
+    return (*evpfn != NULL) ? TPM_RC_SUCCESS
+                            : TPM_RC_FAILURE;
 }
 
 #endif // USE_OPENSSL_FUNCTIONS_SYMMETRIC

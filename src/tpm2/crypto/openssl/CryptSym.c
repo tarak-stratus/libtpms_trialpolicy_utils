@@ -540,7 +540,7 @@ CryptSymmetricEncrypt(
     INT16                blockSize;
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    evpfunc              evpfn;
+    evpfunc              evpfn = NULL;
     EVP_CIPHER_CTX      *ctx = NULL;
     int                  outlen1 = 0;
     int                  outlen2 = 0;
@@ -549,7 +549,7 @@ CryptSymmetricEncrypt(
     UINT32               buffersize = 0;
     BYTE                 keyToUse[MAX_SYM_KEY_BYTES];
     UINT16               keyToUseLen = (UINT16)sizeof(keyToUse);
-    TPM_RC               retVal = TPM_RC_SUCCESS;
+    TPM_RC               retVal;
     int                  ivLen;
 
     pAssert(dOut != NULL && key != NULL && dIn != NULL);
@@ -580,10 +580,10 @@ CryptSymmetricEncrypt(
 		return TPM_RC_SIZE;
         }
 
-    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
-                         keyToUse, &keyToUseLen);
-    if (evpfn == NULL)
-        return TPM_RC_FAILURE;
+    retVal = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                          keyToUse, &keyToUseLen, &evpfn);
+    if (retVal != TPM_RC_SUCCESS)
+        return retVal;
 
     if (dIn == dOut) {
         // in-place encryption; we use a temp buffer
@@ -655,7 +655,7 @@ CryptSymmetricDecrypt(
     INT16                blockSize;
     BYTE                *iv;
     BYTE                 defaultIv[MAX_SYM_BLOCK_SIZE] = {0};
-    evpfunc              evpfn;
+    evpfunc              evpfn = NULL;
     EVP_CIPHER_CTX      *ctx = NULL;
     int                  outlen1 = 0;
     int                  outlen2 = 0;
@@ -703,10 +703,10 @@ CryptSymmetricDecrypt(
 	    break;
 	}
 
-    evpfn = GetEVPCipher(algorithm, keySizeInBits, mode, key,
-                         keyToUse, &keyToUseLen);
-    if (evpfn ==  NULL)
-        return TPM_RC_FAILURE;
+    retVal = GetEVPCipher(algorithm, keySizeInBits, mode, key,
+                         keyToUse, &keyToUseLen, &evpfn);
+    if (retVal != TPM_RC_SUCCESS)
+        return retVal;
 
     /* a buffer with a 'safety margin' for EVP_DecryptUpdate */
     buffersize = TPM2_ROUNDUP(dSize + blockSize, blockSize);
