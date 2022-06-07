@@ -159,7 +159,7 @@ static const struct algname_to_id {
     [TPM_ALG_KDF1_SP800_108] = HASH(ALG_KDF1_SP800_108, "kdf1-sp800-108", false),
     [TPM_ALG_ECC] = ASYMMETRIC(ALG_ECC, "ecc", key_sizes_ecc, false),
     [TPM_ALG_SYMCIPHER] = OTHER(ALG_SYMCIPHER, "symcipher", false),
-    [TPM_ALG_CAMELLIA] = SYMMETRIC(ALG_CAMELLIA, "camellia", key_sizes_camellia, false),
+    [TPM_ALG_CAMELLIA] = SYMMETRIC(ALG_CAMELLIA, "camellia", key_sizes_camellia, true),
     [TPM_ALG_SHA3_256] = HASH(ALG_SHA3_256, "sha3-256", false),
     [TPM_ALG_SHA3_384] = HASH(ALG_SHA3_384, "sha3-384", false),
     [TPM_ALG_SHA3_512] = HASH(ALG_SHA3_512, "sha3-256", false),
