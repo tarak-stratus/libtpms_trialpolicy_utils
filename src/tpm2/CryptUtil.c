@@ -289,6 +289,10 @@ CryptGenerateKeySymmetric(
 {
     UINT16           keyBits = publicArea->parameters.symDetail.sym.keyBits.sym;
     TPM_RC           result;
+
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(publicArea->type,		// libtpms added begin
+					     keyBits))
+        return TPM_RC_KEY_SIZE;						// libtpms added end
     //
     // only do multiples of RADIX_BITS
     if((keyBits % RADIX_BITS) != 0)

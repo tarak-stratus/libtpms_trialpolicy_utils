@@ -814,6 +814,10 @@ CryptEccGenerateKey(
     // Validate parameters
     if(E == NULL)
 	ERROR_RETURN(TPM_RC_CURVE);
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_ECC,		// libtpms added begin
+					     CryptEccGetKeySizeForCurve(publicArea->parameters.eccDetail.curveID)))
+	ERROR_RETURN(TPM_RC_KEY_SIZE);					// libtpms added end
+
     publicArea->unique.ecc.x.t.size = 0;
     publicArea->unique.ecc.y.t.size = 0;
     sensitive->sensitive.ecc.t.size = 0;

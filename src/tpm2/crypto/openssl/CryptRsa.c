@@ -1175,6 +1175,8 @@ CryptRsaGenerateKey(
        || (keySizeInBits > MAX_RSA_KEY_BITS)  // this might be redundant, but...
        || (keySizeInBits == 0))
 	ERROR_RETURN(TPM_RC_VALUE);
+    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_RSA, keySizeInBits))	// libtpms added
+	ERROR_RETURN(TPM_RC_VALUE);						// libtpms added
     // Set the prime size for instrumentation purposes
     INSTRUMENT_SET(PrimeIndex, PRIME_INDEX(keySizeInBits / 2));
 #if SIMULATION && USE_RSA_KEY_CACHE
