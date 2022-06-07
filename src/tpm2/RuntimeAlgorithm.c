@@ -132,7 +132,7 @@ static const struct algname_to_id {
     { .name = ENABLED ? NAME : NULL, .canBeDisabled = CANDISABLE }
 
     [TPM_ALG_RSA] = ASYMMETRIC(ALG_RSA, "rsa", key_sizes_rsa, false),
-    [TPM_ALG_TDES] = SYMMETRIC(ALG_TDES, "tdes", key_sizes_tdes, false),
+    [TPM_ALG_TDES] = SYMMETRIC(ALG_TDES, "tdes", key_sizes_tdes, true),
     [TPM_ALG_SHA1] = HASH(ALG_SHA1, "sha1", false),
     [TPM_ALG_HMAC] = SIGNING(ALG_HMAC, "hmac", false),
     [TPM_ALG_AES] = SYMMETRIC(ALG_AES, "aes", key_sizes_aes, false), // never disable: context encryption

@@ -2702,6 +2702,10 @@ TPMI_TDES_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *si
 	switch (*target) {
 	  case 128:
 	  case 192:
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_TDES,	// libtpms added begin
+						     *target)) {
+		rc = TPM_RC_VALUE;
+	    }								// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
