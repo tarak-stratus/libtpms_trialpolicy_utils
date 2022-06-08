@@ -1413,6 +1413,10 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(TPMI_ALG_SIG_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECSCHNORR	
 	  case TPM_ALG_ECSCHNORR:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+                                              *target)) {
+		rc = TPM_RC_SCHEME;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -2681,10 +2685,11 @@ TPMI_SM4_KEY_BITS_Unmarshal(TPMI_SM4_KEY_BITS *target, BYTE **buffer, INT32 *siz
     if (rc == TPM_RC_SUCCESS) {
 	switch (*target) {
 	  case 128:
-	    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_SM4,	// libtpms added begin
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, 	// libtpms added begin
+	                                             TPM_ALG_SM4,
 						     *target)) {
 		rc = TPM_RC_VALUE;
-	    }								// libtpms added end
+	    }											// libtpms added end
 	    break;
 	  default:
 	    rc = TPM_RC_VALUE;
@@ -3184,6 +3189,10 @@ TPMU_SIG_SCHEME_Unmarshal(TPMU_SIG_SCHEME *target, BYTE **buffer, INT32 *size, U
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
+    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {	// libtpms added begin
+	return TPM_RC_SELECTOR;
+    }											// libtpms added end
+
     switch (selector) {
 #if ALG_RSASSA
       case TPM_ALG_RSASSA:
@@ -3444,6 +3453,9 @@ TPMI_ALG_ASYM_SCHEME_Unmarshal(TPMI_ALG_ASYM_SCHEME *target, BYTE **buffer, INT3
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, *target)) {	// libtpms added begin
+		rc = TPM_RC_VALUE;
+	    }											// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3464,6 +3476,12 @@ TPM_RC
 TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {					// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }								// libtpms added end
 
     switch (selector) {
 #if ALG_ECDH
@@ -3549,6 +3567,10 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm,	// libtpms added begin
+	                                      *target)) {
+		rc = TPM_RC_VALUE;
+	    }										// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3959,6 +3981,12 @@ TPM_RC
 TPMU_SIGNATURE_Unmarshal(TPMU_SIGNATURE *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(&g_RuntimeProfile.RuntimeAlgorithm, selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_RSASSA
