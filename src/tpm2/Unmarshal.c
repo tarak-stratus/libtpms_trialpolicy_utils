@@ -1411,6 +1411,9 @@ TPMI_ALG_SIG_SCHEME_Unmarshal(TPMI_ALG_SIG_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECSCHNORR	
 	  case TPM_ALG_ECSCHNORR:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {	// libtpms added begin
+		rc = TPM_RC_SCHEME;
+	    }							// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3180,6 +3183,10 @@ TPMU_SIG_SCHEME_Unmarshal(TPMU_SIG_SCHEME *target, BYTE **buffer, INT32 *size, U
 {
     TPM_RC rc = TPM_RC_SUCCESS;
 
+    if (!RuntimeAlgorithmCheckEnabled(selector)) {	// libtpms added begin
+	return TPM_RC_SELECTOR;
+    }							// libtpms added end
+
     switch (selector) {
 #if ALG_RSASSA
       case TPM_ALG_RSASSA:
@@ -3440,6 +3447,9 @@ TPMI_ALG_ASYM_SCHEME_Unmarshal(TPMI_ALG_ASYM_SCHEME *target, BYTE **buffer, INT3
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {	// libtpms added begin
+		rc = TPM_RC_VALUE;
+	    }							// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3460,6 +3470,12 @@ TPM_RC
 TPMU_ASYM_SCHEME_Unmarshal(TPMU_ASYM_SCHEME *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {					// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }								// libtpms added end
 
     switch (selector) {
 #if ALG_ECDH
@@ -3545,6 +3561,9 @@ TPMI_ALG_RSA_SCHEME_Unmarshal(TPMI_ALG_RSA_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_OAEP
 	  case TPM_ALG_OAEP:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {		// libtpms added begin
+		rc = TPM_RC_VALUE;
+	    }								// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -3955,6 +3974,12 @@ TPM_RC
 TPMU_SIGNATURE_Unmarshal(TPMU_SIGNATURE *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_RSASSA
