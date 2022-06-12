@@ -1341,9 +1341,10 @@ CryptRsaEncrypt(
                 ERROR_RETURN(TPM_RC_FAILURE);
             break;
           case TPM_ALG_OAEP:
-            digestname = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg);
-            if (digestname == NULL)
-                ERROR_RETURN(TPM_RC_VALUE);
+            retVal = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg,
+                                            &digestname);
+            if (retVal != TPM_RC_SUCCESS)
+                ERROR_RETURN(retVal);
 
             md = EVP_get_digestbyname(digestname);
             if (md == NULL ||
@@ -1427,9 +1428,10 @@ CryptRsaDecrypt(
                 ERROR_RETURN(TPM_RC_FAILURE);
             break;
 	  case TPM_ALG_OAEP:
-            digestname = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg);
-            if (digestname == NULL)
-                ERROR_RETURN(TPM_RC_VALUE);
+            retVal = GetDigestNameByHashAlg(scheme->details.oaep.hashAlg,
+                                            &digestname);
+            if (retVal != TPM_RC_SUCCESS)
+                ERROR_RETURN(retVal);
 
             md = EVP_get_digestbyname(digestname);
             if (md == NULL ||
@@ -1484,7 +1486,7 @@ CryptRsaSign(
 	     //      to use (mostly for testing)
 	     )
 {
-    TPM_RC                retVal = TPM_RC_SUCCESS;
+    TPM_RC                retVal;
     UINT16                modSize;
     size_t                outlen;
     int                   padding;
@@ -1518,9 +1520,9 @@ CryptRsaSign(
             ERROR_RETURN(TPM_RC_SCHEME);
          }
 
-    digestname = GetDigestNameByHashAlg(hashAlg);
-    if (digestname == NULL)
-        ERROR_RETURN(TPM_RC_VALUE);
+    retVal = GetDigestNameByHashAlg(hashAlg, &digestname);
+    if (retVal != TPM_RC_SUCCESS)
+        ERROR_RETURN(retVal);
 
     md = EVP_get_digestbyname(digestname);
     if (md == NULL)
@@ -1601,9 +1603,9 @@ CryptRsaValidateSignature(
     if (retVal != TPM_RC_SUCCESS)
         return retVal;
 
-    digestname = GetDigestNameByHashAlg(sig->signature.any.hashAlg);
-    if (digestname == NULL)
-        ERROR_RETURN(TPM_RC_VALUE);
+    retVal = GetDigestNameByHashAlg(sig->signature.any.hashAlg, &digestname);
+    if (retVal != TPM_RC_SUCCESS)
+        ERROR_RETURN(retVal);
 
     md = EVP_get_digestbyname(digestname);
     ctx = EVP_PKEY_CTX_new(pkey, NULL);

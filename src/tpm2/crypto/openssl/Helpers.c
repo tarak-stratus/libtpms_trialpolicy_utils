@@ -380,16 +380,19 @@ static const struct hnames {
 # error Missing entry in hnames array!
 #endif
 
-LIB_EXPORT const char *
-GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg)
+LIB_EXPORT TPM_RC
+GetDigestNameByHashAlg(const TPM_ALG_ID hashAlg, const char **name)
 {
     unsigned i;
 
     for (i = 0; i < HASH_COUNT; i++) {
-        if (hashAlg == hnames[i].hashAlg)
-            return hnames[i].name;
+        if (hashAlg == hnames[i].hashAlg) {
+            *name = hnames[i].name;
+            return TPM_RC_SUCCESS;
+        }
     }
-    return NULL;
+    *name = NULL;
+    return TPM_RC_FAILURE;
 }
 
 static BOOL
