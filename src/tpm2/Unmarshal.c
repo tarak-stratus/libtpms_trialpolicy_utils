@@ -43,6 +43,7 @@
 
 #include "Unmarshal_fp.h"
 #include "CryptEccMain_fp.h"	// libtpms added
+#include "RuntimeAlgorithm_fp.h"// libtpms added
 
 TPM_RC
 UINT8_Unmarshal(UINT8 *target, BYTE **buffer, INT32 *size)
@@ -1197,6 +1198,9 @@ TPMI_ALG_HASH_Unmarshal(TPMI_ALG_HASH *target, BYTE **buffer, INT32 *size, BOOL 
 #if ALG_SM3_256
 	  case TPM_ALG_SM3_256:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {		// libtpms added begin
+		rc = TPM_RC_HASH;
+	    }								// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1521,6 +1525,9 @@ TPMI_ALG_MAC_SCHEME_Unmarshal(TPMI_ALG_MAC_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_CMAC
 	  case TPM_ALG_CMAC:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {		// libtpms added begin
+		rc = TPM_RC_SYMMETRIC;
+	    }								// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1593,6 +1600,12 @@ TPM_RC
 TPMU_HA_Unmarshal(TPMU_HA *target, BYTE **buffer, INT32 *size, UINT32 selector)
 {
     TPM_RC rc = TPM_RC_SUCCESS;
+
+    if (rc == TPM_RC_SUCCESS) {						// libtpms added begin
+	if (!RuntimeAlgorithmCheckEnabled(selector)) {
+	    return TPM_RC_SELECTOR;
+	}
+    }									// libtpms added end
 
     switch (selector) {
 #if ALG_SHA1

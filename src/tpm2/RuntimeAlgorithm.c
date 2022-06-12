@@ -133,7 +133,7 @@ static const struct algname_to_id {
 
     [TPM_ALG_RSA] = ASYMMETRIC(ALG_RSA, "rsa", key_sizes_rsa, false),
     [TPM_ALG_TDES] = SYMMETRIC(ALG_TDES, "tdes", key_sizes_tdes, true),
-    [TPM_ALG_SHA1] = HASH(ALG_SHA1, "sha1", false),
+    [TPM_ALG_SHA1] = HASH(ALG_SHA1, "sha1", true),
     [TPM_ALG_HMAC] = SIGNING(ALG_HMAC, "hmac", false),
     [TPM_ALG_AES] = SYMMETRIC(ALG_AES, "aes", key_sizes_aes, false), // never disable: context encryption
     [TPM_ALG_MGF1] = HASH(ALG_MGF1, "mgf1", false),
@@ -141,7 +141,7 @@ static const struct algname_to_id {
     [TPM_ALG_XOR] = OTHER(ALG_XOR, "xor", false),
     [TPM_ALG_SHA256] = HASH(ALG_SHA256, "sha256", false),
     [TPM_ALG_SHA384] = HASH(ALG_SHA384, "sha384", false),
-    [TPM_ALG_SHA512] = HASH(ALG_SHA512, "sha512", false),
+    [TPM_ALG_SHA512] = HASH(ALG_SHA512, "sha512", true),
     [TPM_ALG_NULL] = OTHER(true, "null", false),
     [TPM_ALG_SM4] = SYMMETRIC(ALG_SM4, "sm4", key_sizes_sm4, true),
     [TPM_ALG_RSASSA] = SIGNING(ALG_RSASSA, "rsassa", true),
@@ -476,4 +476,25 @@ RuntimeAlgorithmGet(
     free(buffer);
 
     return nbuffer;
+}
+
+LIB_EXPORT void
+RuntimeAlgorithmsFilterPCRSelection(
+				    TPML_PCR_SELECTION *pcrSelection // IN/OUT: PCRSelection to filter
+				    )
+{
+    UINT32 i = 0;
+
+    while (i < pcrSelection->count) {
+	if (!RuntimeAlgorithmCheckEnabled(pcrSelection->pcrSelections[i].hash)) {
+	    pcrSelection->count--;
+	    if (pcrSelection->count - 1 > i) {
+		MemoryCopy(&pcrSelection->pcrSelections[i],
+			   &pcrSelection->pcrSelections[i + 1],
+			   sizeof(pcrSelection->pcrSelections[0]) * (pcrSelection->count - i));
+	    }
+	} else {
+	    i++;
+	}
+    }
 }
