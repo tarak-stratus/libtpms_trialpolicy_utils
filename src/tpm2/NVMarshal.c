@@ -4849,6 +4849,8 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     memset(&scd, 0, sizeof(scd));
     memset(indexOrderlyRam, 0, sizeof(indexOrderlyRam));
 
+    rc = RuntimeAlgorithmSetProfile(NULL);
+
     if (rc == TPM_RC_SUCCESS) {
         rc = NV_HEADER_Unmarshal(&hdr, buffer, size,
                                  PERSISTENT_ALL_VERSION,

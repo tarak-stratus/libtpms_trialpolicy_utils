@@ -86,14 +86,14 @@ RuntimeAlgorithmSwitchProfile(
 
 BOOL
 RuntimeAlgorithmCheckEnabled(
-                             TPM_ALG_ID                    algId      // IN: the algorithm to check
-                             );
+			     TPM_ALG_ID		    algId      // IN: the algorithm to check
+			     );
 
 BOOL
 RuntimeAlgorithmKeySizeCheckEnabled(
-                                    TPM_ALG_ID   algId,         // IN: the algorithm to check
-                                    UINT16       keySizeInBits  // IN: size of the key in bits
-                                    );
+				    TPM_ALG_ID   algId,	        // IN: the algorithm to check
+				    UINT16       keySizeInBits  // IN: size of the key in bits
+				    );
 
 enum RuntimeAlgorithmType {
     RUNTIME_ALGO_IMPLEMENTED,
