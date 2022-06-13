@@ -1450,6 +1450,9 @@ TPMI_ECC_KEY_EXCHANGE_Unmarshal(TPMI_ECC_KEY_EXCHANGE *target, BYTE **buffer, IN
 	  case TPM_ALG_SM2:
 #endif
 	    break;
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {	// libtpms added begin
+		rc = TPM_RC_SCHEME;
+	    }							// libtpms added end
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
 		break;
@@ -3787,6 +3790,9 @@ TPMI_ALG_ECC_SCHEME_Unmarshal(TPMI_ALG_ECC_SCHEME *target, BYTE **buffer, INT32 
 #if ALG_ECMQV
 	  case TPM_ALG_ECMQV:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {	// libtpms added begin
+		rc = TPM_RC_SCHEME;
+	    }							// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
