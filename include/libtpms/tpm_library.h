@@ -106,6 +106,7 @@ enum TPMLIB_InfoFlags {
     TPMLIB_INFO_TPMSPECIFICATION = 1,
     TPMLIB_INFO_TPMATTRIBUTES = 2,
     TPMLIB_INFO_TPMFEATURES = 4,
+    TPMLIB_INFO_TPMRUNTIMEALGORITHMS = 8,
 };
 
 char *TPMLIB_GetInfo(enum TPMLIB_InfoFlags flags);
@@ -165,6 +166,8 @@ TPM_RESULT TPMLIB_SetState(enum TPMLIB_StateType st,
                            const unsigned char *buffer, uint32_t buflen);
 TPM_RESULT TPMLIB_GetState(enum TPMLIB_StateType st,
                            unsigned char **buffer, uint32_t *buflen);
+
+TPM_RESULT TPMLIB_SetProfile(const char *profile);
 
 #ifdef __cplusplus
 }

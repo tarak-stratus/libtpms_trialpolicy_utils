@@ -379,12 +379,22 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         ", \"SM4KeySizes\":[128]"
 #endif
     "}";
+    const char *tpmRuntimeAlgorithms_temp =
+    "\"TPMRuntimeAlgorithms\":{"
+        "\"Implemented\":%s,"
+        "\"CanBeDisabled\":%s,"
+        "\"Enabled\":%s,"
+        "\"Disabled\":%s"
+    "}";
     char *fmt = NULL, *buffer;
     bool printed = false;
     char *tpmattrs = NULL;
     char *tpmfeatures = NULL;
     char rsakeys[32];
     char camelliakeys[16];
+    char *runtimeAlgos[RUNTIME_ALGO_NUM] = { NULL, };
+    enum RuntimeAlgorithmType rat;
+    char *tpmRuntimeAlgorithms = NULL;
     size_t n;
 
     if (!(buffer = strdup("{%s%s%s}")))
@@ -436,25 +446,46 @@ static char *TPM2_GetInfo(enum TPMLIB_InfoFlags flags)
         printed = true;
     }
 
+    if ((flags & TPMLIB_INFO_TPMRUNTIMEALGORITHMS)) {
+        fmt = buffer;
+        buffer = NULL;
+        for (rat = RUNTIME_ALGO_IMPLEMENTED; rat < RUNTIME_ALGO_NUM; rat++) {
+            runtimeAlgos[rat] = RuntimeAlgorithmGet(&g_RuntimeProfile.RuntimeAlgorithm, rat);
+            if (!runtimeAlgos[rat])
+                goto error;
+        }
+        if (asprintf(&tpmRuntimeAlgorithms, tpmRuntimeAlgorithms_temp,
+                     runtimeAlgos[RUNTIME_ALGO_IMPLEMENTED],
+                     runtimeAlgos[RUNTIME_ALGO_CAN_BE_DISABLED],
+                     runtimeAlgos[RUNTIME_ALGO_ENABLED],
+                     runtimeAlgos[RUNTIME_ALGO_DISABLED]) < 0)
+            goto error;
+        if (asprintf(&buffer, fmt,  printed ? "," : "",
+                     tpmRuntimeAlgorithms, "%s%s%s") < 0)
+            goto error;
+        free(fmt);
+        printed = true;
+    }
+
     /* nothing else to add */
     fmt = buffer;
     buffer = NULL;
     if (asprintf(&buffer, fmt, "", "", "") < 0)
         goto error;
 
+exit:
     free(fmt);
     free(tpmattrs);
     free(tpmfeatures);
+    for (rat = RUNTIME_ALGO_IMPLEMENTED; rat < RUNTIME_ALGO_NUM; rat++)
+        free(runtimeAlgos[rat]);
 
     return buffer;
 
 error:
-    free(fmt);
     free(buffer);
-    free(tpmattrs);
-    free(tpmfeatures);
-
-    return NULL;
+    buffer = NULL;
+    goto exit;
 }
 
 static uint32_t tpm2_buffersize = TPM_BUFFER_MAX;
