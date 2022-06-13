@@ -1330,6 +1330,9 @@ TPMI_ALG_SYM_MODE_Unmarshal(TPMI_ALG_SYM_MODE *target, BYTE **buffer, INT32 *siz
 #if ALG_CMAC
 	  case TPM_ALG_CMAC:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {		// libtpms added begin
+		rc = TPM_RC_MODE;
+	    }								// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
@@ -1569,6 +1572,9 @@ TPMI_ALG_CIPHER_MODE_Unmarshal(TPMI_ALG_CIPHER_MODE*target, BYTE **buffer, INT32
 #if ALG_ECB	
 	  case TPM_ALG_ECB:
 #endif
+	    if (!RuntimeAlgorithmCheckEnabled(*target)) {		// libtpms added begin
+		rc = TPM_RC_MODE;
+	    }								// libtpms added end
 	    break;
 	  case TPM_ALG_NULL:
 	    if (allowNull) {
