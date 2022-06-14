@@ -293,6 +293,62 @@ TPM2B_PROOF_Unmarshal(TPM2B_PROOF *target, BYTE **buffer, INT32 *size)
     return rc;
 }
 
+/* Marshal a string including its terminating NUL byte. A NULL pointer will be
+ * marshalled with 0 bytes and will be unmarshalled as a NULL pointer again.
+ */
+static UINT16
+String_Marshal(const char *source, BYTE **buffer, INT32 *size)
+{
+    UINT16 written = 0;
+    UINT16 len = 0;
+
+    if (source)
+        len = (UINT16)strlen(source) + 1;
+    written += UINT16_Marshal(&len, buffer, size);
+
+    if (len > 0 && *size >= len) {
+        memcpy(*buffer, source, len);
+        *buffer += len;
+        *size -= len;
+
+        written += len;
+    }
+
+    return written;
+}
+
+static TPM_RC
+String_Unmarshal(char **target, BYTE **buffer, INT32 *size)
+{
+    TPM_RC rc = TPM_RC_SUCCESS;
+    UINT16 len;
+
+    *target = NULL;
+
+    if (rc == TPM_RC_SUCCESS) {
+        rc = UINT16_Unmarshal(&len, buffer, size);
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (*size < len) {
+            rc = TPM_RC_INSUFFICIENT;
+        } else if (len > 0) {
+            *target = malloc(len);
+            if (!*target) {
+                rc = TPM_RC_MEMORY;
+            }
+        }
+    }
+    if (rc == TPM_RC_SUCCESS) {
+        if (len > 0) {
+            memcpy(*target, *buffer, len);
+            *buffer += len;
+            *size -= len;
+        }
+    }
+
+    return rc;
+}
+
 static TPM_RC
 UINT32_Unmarshal_Check(UINT32 *data, UINT32 exp, BYTE **buffer, INT32 *size,
                        const char *msg)
@@ -4779,7 +4835,7 @@ exit_size:
  * - indexOrderlyRAM  (NV_INDEX_RAM_DATA)
  * - NVRAM locations  (NV_USER_DYNAMIC)
  */
-#define PERSISTENT_ALL_VERSION 3
+#define PERSISTENT_ALL_VERSION 4
 #define PERSISTENT_ALL_MAGIC   0xab364723
 UINT32
 PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
@@ -4793,6 +4849,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
     BLOCK_SKIP_INIT;
     BOOL writeSuState;
+    const char *profile = RuntimeAlgorithmGetProfile();
 
     NvRead(&pd, NV_PERSISTENT_DATA, sizeof(pd));
     NvRead(&od, NV_ORDERLY_DATA, sizeof(od));
@@ -4804,7 +4861,7 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
 
     written = NV_HEADER_Marshal(buffer, size,
                                 PERSISTENT_ALL_VERSION,
-                                PERSISTENT_ALL_MAGIC, 3);
+                                PERSISTENT_ALL_MAGIC, 4);
     written += PACompileConstants_Marshal(buffer, size);
     written += PERSISTENT_DATA_Marshal(&pd, buffer, size);
     written += ORDERLY_DATA_Marshal(&od, buffer, size);
@@ -4817,6 +4874,8 @@ PERSISTENT_ALL_Marshal(BYTE **buffer, INT32 *size)
     written += INDEX_ORDERLY_RAM_Marshal(indexOrderlyRam, sizeof(indexOrderlyRam),
                                          buffer, size);
     written += USER_NVRAM_Marshal(buffer, size);
+
+    written += String_Marshal(profile, buffer, size);
 
     written += BLOCK_SKIP_WRITE_PUSH(TRUE, buffer, size);
     /* future versions append below this line */
@@ -4842,6 +4901,7 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
     STATE_CLEAR_DATA scd;
     BYTE indexOrderlyRam[sizeof(s_indexOrderlyRam)];
     BOOL readSuState = false;
+    char *profile = NULL;
 
     memset(&pd, 0, sizeof(pd));
     memset(&od, 0, sizeof(od));
@@ -4889,6 +4949,10 @@ PERSISTENT_ALL_Unmarshal(BYTE **buffer, INT32 *size)
            NVRAM to fit everything. */
     }
 
+    if (rc == TPM_RC_SUCCESS && hdr.version >= 4) {
+        rc = String_Unmarshal(&profile, buffer, size);
+    }
+
     /* version 2 starts having indicator for next versions that we can skip;
        this allows us to downgrade state */
     if (rc == TPM_RC_SUCCESS && hdr.version >= 2) {
@@ -4910,6 +4974,7 @@ skip_future_versions:
         NvWrite(NV_STATE_RESET_DATA, sizeof(srd), &srd);
         NvWrite(NV_STATE_CLEAR_DATA, sizeof(scd), &scd);
         NvWrite(NV_INDEX_RAM_DATA, sizeof(indexOrderlyRam), indexOrderlyRam);
+        rc = RuntimeAlgorithmSetProfile(profile);
     }
 
     return rc;
