@@ -217,6 +217,10 @@ TPM_ECC_CURVE_Unmarshal(TPM_ECC_CURVE *target, BYTE **buffer, INT32 *size)
 	  case TPM_ECC_BN_P256:
 	  case TPM_ECC_BN_P638:
 	  case TPM_ECC_SM2_P256:
+	    if (!RuntimeAlgorithmKeySizeCheckEnabled(TPM_ALG_ECC,
+	                                             CryptEccGetKeySizeForCurve(*target))) {
+                return TPM_RC_CURVE;
+	    }
 	    break;
 	  default:
 	    rc = TPM_RC_CURVE;
