@@ -1,7 +1,7 @@
 /********************************************************************************/
 /*										*/
-/*			 Algorithm Runtime Disablement 				*/
-/*			     Written by stefan Berger				*/
+/*			        Runtime Profile 				*/
+/*			     Written by Stefan Berger				*/
 /*		       IBM Thomas J. Watson Research Center			*/
 /*										*/
 /*  Licenses and Notices							*/
@@ -58,62 +58,41 @@
 /*										*/
 /********************************************************************************/
 
-#ifndef RUNTIME_ALGORITHM_H
-#define RUNTIME_ALGORITHM_H
+#ifndef RUNTIME_PROFILE_H
+#define RUNTIME_PROFILE_H
 
-#define NUM_ENTRIES_ALGORITHM_PROPERTIES	(size_t)(TPM_ALG_LAST + 1)
+#include "RuntimeAlgorithm_fp.h"
+#include "RuntimeCommands_fp.h"
 
-struct RuntimeAlgorithm {
-    /* array holding minimum key sizes for algorithms in algsWithKeySizes */
-    UINT16 algosMinimumKeySizes[NUM_ENTRIES_ALGORITHM_PROPERTIES];
-    ALGORITHM_VECTOR enabledAlgorithms;
-    char *algorithmProfile;
+struct RuntimeProfile {
+    struct RuntimeAlgorithm RuntimeAlgorithm;
+    struct RuntimeCommands  RuntimeCommands;
+    char *profileName;		/* name of profile */
+    char *runtimeProfileJSON;	/* JSON description */
 };
 
-void
-RuntimeAlgorithmInit(
-		     struct RuntimeAlgorithm *RuntimeAlgorithm
-		     );
+extern struct RuntimeProfile g_RuntimeProfile;
+
+LIB_EXPORT TPM_RC
+RuntimeProfileInit(
+		   struct RuntimeProfile           *RuntimeProfile
+		   );
 
 TPM_RC
-RuntimeAlgorithmSetProfile(
-			   struct RuntimeAlgorithm *RuntimeAlgorithm,
-			   const char              *newProfile
-			   );
+RuntimeProfileSet(
+                  struct RuntimeProfile *RuntimeProfile,
+		  const char            *json
+		  );
 
-TPM_RC
-RuntimeAlgorithmSwitchProfile(
-			      struct RuntimeAlgorithm  *RuntimeAlgorithm,
-			      const char               *newProfile,
-			      char                    **oldProfile
-			      );
+LIB_EXPORT TPM_RC
+RuntimeProfileTest(
+                   struct RuntimeProfile *RuntimeProfile,
+		   const char            *json
+		   );
 
-BOOL
-RuntimeAlgorithmCheckEnabled(
-			     struct RuntimeAlgorithm *RuntimeAlgorithm,
-			     TPM_ALG_ID		      algId      // IN: the algorithm to check
-			     );
+LIB_EXPORT const char *
+RuntimeProfileGetJSON(
+		      struct RuntimeProfile *RuntimeProfile
+		      );
 
-BOOL
-RuntimeAlgorithmKeySizeCheckEnabled(
-				    struct RuntimeAlgorithm *RuntimeAlgorithm,
-				    TPM_ALG_ID               algId,         // IN: the algorithm to check
-				    UINT16                   keySizeInBits  // IN: size of the key in bits
-				    );
-
-enum RuntimeAlgorithmType {
-    RUNTIME_ALGO_IMPLEMENTED,
-    RUNTIME_ALGO_ENABLED,
-    RUNTIME_ALGO_DISABLED,
-    RUNTIME_ALGO_CAN_BE_DISABLED,
-
-    RUNTIME_ALGO_NUM, /* keep last */
-};
-
-char *
-RuntimeAlgorithmGet(
-		    struct RuntimeAlgorithm   *RuntimeAlgorithm,
-		    enum RuntimeAlgorithmType rat
-		    );
-
-#endif /* RUNTIME_ALGORITHM_H */
+#endif /* RUNTIME_PROFILE_H */
