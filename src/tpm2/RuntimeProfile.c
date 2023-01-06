@@ -544,7 +544,7 @@ RuntimeProfileSet(
 						     algorithmsProfile,
 						     commandsProfile);
 	    if (retVal != TPM_RC_SUCCESS)
-		return retVal;
+		goto error;
 	    break;
 	}
     }
