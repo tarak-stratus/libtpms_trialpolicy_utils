@@ -523,6 +523,7 @@ TPM2_PolicyLocality(
 #include "PolicyNV_fp.h"
 #if CC_PolicyNV  // Conditional expansion of this file
 #include "Policy_spt_fp.h"
+#include "tpm_debug.h"
 TPM_RC
 TPM2_PolicyNV(
 	      PolicyNV_In     *in             // IN: input parameter list
@@ -570,25 +571,39 @@ TPM2_PolicyNV(
     argHash.t.size = CryptHashStart(&hashState, session->authHashAlg);
     //  add operandB
     CryptDigestUpdate2B(&hashState, &in->operandB.b);
+    TPM_PrintAll("\noperandB", in->operandB.b.buffer, in->operandB.b.size);
+
     //  add offset
     CryptDigestUpdateInt(&hashState, sizeof(UINT16), in->offset);
+    printf("\noffset = %x\n", in->offset);
+
     //  add operation
     CryptDigestUpdateInt(&hashState, sizeof(TPM_EO), in->operation);
+    printf("\noperation = %x\n", in->operation);
+
     //  complete argument digest
     CryptHashEnd2B(&hashState, &argHash.b);
+    TPM_PrintAll("\nhash end: ", argHash.b.buffer, argHash.b.size);
+
     // Update policyDigest
     //  Start digest
     CryptHashStart(&hashState, session->authHashAlg);
     //  add old digest
     CryptDigestUpdate2B(&hashState, &session->u2.policyDigest.b);
+    TPM_PrintAll("\nprior digest: ", session->u2.policyDigest.b.buffer, session->u2.policyDigest.b.size);
     //  add commandCode
     CryptDigestUpdateInt(&hashState, sizeof(TPM_CC), commandCode);
+    printf("\noperation = %x\n", commandCode);
     //  add argument digest
     CryptDigestUpdate2B(&hashState, &argHash.b);
     // Adding nvName
     CryptDigestUpdate2B(&hashState, &EntityGetName(in->nvIndex, &nvName)->b);
+    TPM_PrintAll("\nname = ", EntityGetName(in->nvIndex, &nvName)->b.buffer,
+        EntityGetName(in->nvIndex, &nvName)->b.size );
+
     // complete the digest
     CryptHashEnd2B(&hashState, &session->u2.policyDigest.b);
+    TPM_PrintAll("\nhash end: ", argHash.b.buffer, argHash.b.size);
     return TPM_RC_SUCCESS;
 }
 #endif // CC_PolicyNV
