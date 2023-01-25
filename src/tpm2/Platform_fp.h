@@ -210,7 +210,7 @@ _plat__NVEnable_NVChipFile(
 /* Disable NV memory */
 LIB_EXPORT void
 _plat__NVDisable(
-		 int             delete           // IN: If TRUE, delete the NV contents.
+		 int             delete_nv_mem           // IN: If TRUE, delete the NV contents.
 		 );
 /* C.8.6.4. _plat__IsNvAvailable() */
 /* Check if NV is available */

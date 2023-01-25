@@ -258,7 +258,7 @@ FOR_EACH_HASH(HASH_TPM2B)
 #define ECDSA_OID(NAME)
 #endif
 
-typedef const struct
+typedef const struct HASH_DEF_STRUcT
 {
     HASH_METHODS         method;
     uint16_t             blockSize;
